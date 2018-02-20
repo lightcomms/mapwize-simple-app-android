@@ -9,6 +9,11 @@
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:mapbox_myLocation="true"
+        app:mapbox_cameraTargetLat="37.457304"
+        app:mapbox_cameraTargetLng="-115.482597"
+        app:mapbox_styleUrl="mapbox://styles/mapbox/streets-v10"
+        app:mapbox_cameraZoom="11" />
 
 </android.support.constraint.ConstraintLayout>

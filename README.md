@@ -26,4 +26,4 @@ For any support with this provider, please do not hesitate to contact [support@m
 
 ## License
 
-MIT
+MITAdding the http calls to get mapwize beacons

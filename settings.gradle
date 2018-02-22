@@ -1,1 +1,1 @@
-include ':app',':IndoorLocation'
+include ':app'

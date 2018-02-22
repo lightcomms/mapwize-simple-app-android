@@ -11,9 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:mapbox_myLocation="true"
-        app:mapbox_cameraTargetLat="37.457304"
-        app:mapbox_cameraTargetLng="-115.482597"
+        app:mapbox_cameraTargetLat="48.887742751309446"
+        app:mapbox_cameraTargetLng="2.168793641030789"
         app:mapbox_styleUrl="mapbox://styles/mapbox/streets-v10"
-        app:mapbox_cameraZoom="11" />
+        app:mapbox_cameraZoom="17" />
 
 </android.support.constraint.ConstraintLayout>

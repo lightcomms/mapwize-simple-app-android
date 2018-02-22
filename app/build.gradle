@@ -9,20 +9,36 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            try {
+                storeFile file("/Users/xme/.android/"+KEY_FILE )
+                //noinspection GroovyAssignabilityCheck
+                storePassword KEYSTORE_PASSWORD
+                keyAlias KEY_ALIAS
+                //noinspection GroovyAssignabilityCheck
+                keyPassword KEY_PASSWORD
+            } catch (ex) {
+                //throw new InvalidUserDataException("You should define KEYSTORE_PASSWORD and KEY_PASSWORD and KEY_ALIAS in gradle.properties.\nException thrown:\t" + ex)
+            }
         }
     }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    buildToolsVersion '26.0.3'
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation ("io.mapwize.indoormaps:MapwizeForMapbox:1.0.1@aar") {
+    implementation('io.mapwize.indoormaps:MapwizeForMapbox:1.0.4@aar') {
         transitive = true
     }
-    compile project(path: ':IndoorLocation')
+    implementation('io.slms.cordova.vlc:vlclib:1.4')
 }

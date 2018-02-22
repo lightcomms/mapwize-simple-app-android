@@ -3,7 +3,6 @@ package io.mapwize.mapwizesimpleapplication;
 import android.app.Application;
 
 import io.mapwize.mapwizeformapbox.AccountManager;
-import io.slms.cordova.vlc.VLCPlugin;
 
 /**
  * Created by xme on 20/02/2018.

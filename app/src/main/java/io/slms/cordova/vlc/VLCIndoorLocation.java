@@ -3,14 +3,11 @@ package io.slms.cordova.vlc;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.os.Handler;
-import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.location.Location;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.logging.Logger;
 
 
 import io.indoorlocation.core.IndoorLocation;
@@ -19,48 +16,48 @@ import io.indoorlocation.core.IndoorLocationProvider;
 /**
  * <p>                          Example class to call vlc command and link callbacks
  * <p><strong>Description :</strong>
- * <p><strong>File :</strong>       VLCPlugin.java
+ * <p><strong>File :</strong>       VLCIndoorLocation.java
  * <p><strong>Author :</strong>     Xavier Melendez
  * <p><strong>Date :</strong>       10/05/2017
  * <p><strong>Company :</strong>     slms
  */
-public final class VLCPlugin extends IndoorLocationProvider
+public final class VLCIndoorLocation extends IndoorLocationProvider
 {
     private static boolean started=false;
     private static IndoorLocation lastLocation;
     static {
-        lastLocation = new IndoorLocation(new Location(VLCPlugin.class.getName()),0.0);
+        lastLocation = new IndoorLocation(new Location(VLCIndoorLocation.class.getName()),0.0);
         lastLocation.setBearing(0.1f);
         lastLocation.setAccuracy(0.1f);
     }
 
 
     @SuppressLint({"StaticFieldLeak"})
-    private static VLCPlugin vlcPlugin =null;
+    private static VLCIndoorLocation vlcIndoorLocation =null;
     private final Application application;
     private final Handler handler;
     private final String vlcApiKey;
-    //private final static  java.util.logging.Logger logger = Logger.getLogger(VLCPlugin.class.getName());
+    //private final static  java.util.logging.Logger logger = Logger.getLogger(VLCIndoorLocation.class.getName());
 
-    public static VLCPlugin init(@NonNull Application application,@NonNull String vlcAPIKey){
-        if(vlcPlugin != null) {
-            throw new IllegalStateException("VLCPlugin already initialized");
+    public static VLCIndoorLocation init(@NonNull Application application, @NonNull String vlcAPIKey){
+        if(vlcIndoorLocation != null) {
+            throw new IllegalStateException("VLCIndoorLocation already initialized");
         } else {
-            vlcPlugin = new VLCPlugin(application,vlcAPIKey);
+            vlcIndoorLocation = new VLCIndoorLocation(application,vlcAPIKey);
             /*try {
-                VLCPlugin.ipcCallbacks.onNewMessage(new JSONObject("{\"data\":\"0x71\"}"));
+                VLCIndoorLocation.ipcCallbacks.onNewMessage(new JSONObject("{\"data\":\"0x71\"}"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }*/
-            return vlcPlugin;
+            return vlcIndoorLocation;
         }
     }
 
-    public static VLCPlugin getVlcPlugin(){
-        return vlcPlugin;
+    public static VLCIndoorLocation getVlcIndoorLocation(){
+        return vlcIndoorLocation;
     }
 
-    private VLCPlugin (Application application, String vlcAPIKey){
+    private VLCIndoorLocation(Application application, String vlcAPIKey){
         this.application=application;
         this.handler = new android.os.Handler(application.getMainLooper());
         this.vlcApiKey=vlcAPIKey;
@@ -69,10 +66,10 @@ public final class VLCPlugin extends IndoorLocationProvider
             @Override
             public void onError(JSONObject jsonObject) {
                 final JSONObject localObj = jsonObject;
-                VLCPlugin.this.handler.post(new Runnable() {
+                VLCIndoorLocation.this.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getVlcPlugin().dispatchOnProviderError(new Error(localObj.toString()));
+                        getVlcIndoorLocation().dispatchOnProviderError(new Error(localObj.toString()));
                     }
                 });
             }
@@ -80,10 +77,10 @@ public final class VLCPlugin extends IndoorLocationProvider
             @Override
             public void onProcessStopped(JSONObject jsonObject) {
                 started = false;
-                VLCPlugin.this.handler.post(new Runnable() {
+                VLCIndoorLocation.this.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getVlcPlugin().dispatchOnProviderStopped();
+                        getVlcIndoorLocation().dispatchOnProviderStopped();
                     }
                 });
             }
@@ -91,10 +88,10 @@ public final class VLCPlugin extends IndoorLocationProvider
             @Override
             public void onProcessStarted(JSONObject jsonObject) {
                 started = true;
-                VLCPlugin.this.handler.post(new Runnable() {
+                VLCIndoorLocation.this.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getVlcPlugin().dispatchOnProviderStarted();
+                        getVlcIndoorLocation().dispatchOnProviderStarted();
                     }
                 });
             }
@@ -106,16 +103,16 @@ public final class VLCPlugin extends IndoorLocationProvider
                 try {
                     vlcId = jsonObject.getString("data");
                 } catch (JSONException e) {
-                    VLCPlugin.this.handler.post(new Runnable() {
+                    VLCIndoorLocation.this.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            VLCPlugin.this.dispatchOnProviderError(new Error("Empty VLC data"));
+                            VLCIndoorLocation.this.dispatchOnProviderError(new Error("Empty VLC data"));
                         }
                     });
                     return;
                 }
                 // get the location from the location service
-                final IndoorLocation localLocation=  getVlcPlugin().getHardLocation(vlcId,getVlcPlugin().vlcApiKey);
+                final IndoorLocation localLocation=  getVlcIndoorLocation().getHardLocation(vlcId, getVlcIndoorLocation().vlcApiKey);
                 if ( true||localLocation.getLatitude() != lastLocation.getLatitude()
                         || localLocation.getLongitude() != lastLocation.getLongitude()
                         || localLocation.getFloor() != lastLocation.getFloor())
@@ -125,10 +122,10 @@ public final class VLCPlugin extends IndoorLocationProvider
                     lastLocation.setFloor(localLocation.getFloor());
                     lastLocation.setTime(localLocation.getTime());
 
-                    VLCPlugin.this.handler.post(new Runnable() {
+                    VLCIndoorLocation.this.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            getVlcPlugin().dispatchIndoorLocationChange(localLocation);
+                            getVlcIndoorLocation().dispatchIndoorLocationChange(localLocation);
                         }
                     });
                 }else{

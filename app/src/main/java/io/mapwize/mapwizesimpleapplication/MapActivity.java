@@ -17,18 +17,13 @@ import java.util.logging.Logger;
 
 import io.mapwize.mapwizeformapbox.MapOptions;
 import io.mapwize.mapwizeformapbox.MapwizePlugin;
-import io.mapwize.mapwizeformapbox.api.Api;
-import io.mapwize.mapwizeformapbox.api.ApiCallback;
-import io.mapwize.mapwizeformapbox.model.Venue;
-import io.slms.cordova.vlc.VLCPlugin;
-
-import static io.mapwize.mapwizeformapbox.api.Api.getVenue;
+import io.slms.cordova.vlc.VLCIndoorLocation;
 
 public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
     private MapwizePlugin mapwizePlugin;
-    private VLCPlugin vlcLocationProvider;
+    private VLCIndoorLocation vlcLocationProvider;
     private java.util.logging.Logger logger = Logger.getLogger(MapActivity.class.getName());
 
     @Override
@@ -77,8 +72,8 @@ public class MapActivity extends AppCompatActivity {
     }
 
     private void attachLocationProvider(){
-        VLCPlugin.init(getApplication(),"anapikeyforvlc");
-        vlcLocationProvider = VLCPlugin.getVlcPlugin();
+        VLCIndoorLocation.init(getApplication(),"anapikeyforvlc");
+        vlcLocationProvider = VLCIndoorLocation.getVlcIndoorLocation();
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {

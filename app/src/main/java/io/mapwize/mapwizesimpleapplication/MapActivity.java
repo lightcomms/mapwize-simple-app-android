@@ -23,7 +23,6 @@ public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
     private MapwizePlugin mapwizePlugin;
-    private VLCIndoorLocation vlcLocationProvider;
     private java.util.logging.Logger logger = Logger.getLogger(MapActivity.class.getName());
 
     @Override
@@ -73,7 +72,7 @@ public class MapActivity extends AppCompatActivity {
 
     private void attachLocationProvider(){
         VLCIndoorLocation.init(getApplication(),"anapikeyforvlc");
-        vlcLocationProvider = VLCIndoorLocation.getVlcIndoorLocation();
+
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
@@ -84,7 +83,7 @@ public class MapActivity extends AppCompatActivity {
                         .build();
 
                 mapwizePlugin = new MapwizePlugin(mapView, mapboxMap, options);
-                mapwizePlugin.setLocationProvider(vlcLocationProvider);
+                mapwizePlugin.setLocationProvider(VLCIndoorLocation.getVlcIndoorLocation());
 
                 /*getVenue("5a8b1432c0b1600013546407",new ApiCallback<Venue>(){
 
@@ -115,8 +114,8 @@ public class MapActivity extends AppCompatActivity {
         super.onResume();
         mapView.onResume();
 
-        if (vlcLocationProvider!=null && !vlcLocationProvider.isStarted()){
-            vlcLocationProvider.start();
+        if (VLCIndoorLocation.getVlcIndoorLocation()!=null && !VLCIndoorLocation.getVlcIndoorLocation().isStarted()){
+            VLCIndoorLocation.getVlcIndoorLocation().start();
         }
 
     }
@@ -126,8 +125,8 @@ public class MapActivity extends AppCompatActivity {
         super.onPause();
         mapView.onPause();
 
-        if (vlcLocationProvider!=null && vlcLocationProvider.isStarted()){
-            vlcLocationProvider.stop();
+        if (VLCIndoorLocation.getVlcIndoorLocation()!=null && VLCIndoorLocation.getVlcIndoorLocation().isStarted()){
+            VLCIndoorLocation.getVlcIndoorLocation().stop();
         }
     }
 

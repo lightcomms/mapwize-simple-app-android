@@ -2,13 +2,17 @@ package io.slms.cordova.vlc;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.location.Location;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.location.Location;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
 
 import io.indoorlocation.core.IndoorLocation;
 import io.indoorlocation.core.IndoorLocationProvider;
@@ -37,6 +41,10 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
     private final Application application;
     private final Handler handler;
     private final String vlcApiKey;
+    private boolean doLiveLocation=false;
+    private List<VLCBeaconListRetriever.VLCBeacon> vlcKnownLocation;
+    private String vlcId;
+    private java.util.logging.Logger logger= Logger.getLogger(VLCIndoorLocation.class.getName());
     //private final static  java.util.logging.Logger logger = Logger.getLogger(VLCIndoorLocation.class.getName());
 
     public static VLCIndoorLocation init(@NonNull Application application, @NonNull String vlcAPIKey){
@@ -44,11 +52,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
             throw new IllegalStateException("VLCIndoorLocation already initialized");
         } else {
             vlcIndoorLocation = new VLCIndoorLocation(application,vlcAPIKey);
-            /*try {
-                VLCIndoorLocation.ipcCallbacks.onNewMessage(new JSONObject("{\"data\":\"0x71\"}"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }*/
+
             return vlcIndoorLocation;
         }
     }
@@ -61,6 +65,22 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
         this.application=application;
         this.handler = new android.os.Handler(application.getMainLooper());
         this.vlcApiKey=vlcAPIKey;
+        VLCBeaconListRetriever.go(new VLCBeaconListRetriever.VLCBeaconCallback() {
+            @Override
+            public void onFailure( IOException e) {
+                logger.severe("onFailure");
+                doLiveLocation = false;
+                vlcKnownLocation=null;
+            }
+
+            @Override
+            public void onSuccess(List<VLCBeaconListRetriever.VLCBeacon> beacons)  {
+                logger.severe("onResponse");
+                vlcKnownLocation=beacons;
+                doLiveLocation=true;
+
+            }
+        });
 
         this.ipcCallbacks= new IPCCallbacks() {
             @Override
@@ -69,7 +89,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
                 VLCIndoorLocation.this.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getVlcIndoorLocation().dispatchOnProviderError(new Error(localObj.toString()));
+                        VLCIndoorLocation.this.dispatchOnProviderError(new Error(localObj.toString()));
                     }
                 });
             }
@@ -80,7 +100,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
                 VLCIndoorLocation.this.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getVlcIndoorLocation().dispatchOnProviderStopped();
+                        VLCIndoorLocation.this.dispatchOnProviderStopped();
                     }
                 });
             }
@@ -91,7 +111,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
                 VLCIndoorLocation.this.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getVlcIndoorLocation().dispatchOnProviderStarted();
+                        VLCIndoorLocation.this.dispatchOnProviderStarted();
                     }
                 });
             }
@@ -99,9 +119,14 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
             @Override
             public void onNewMessage(JSONObject jsonObject) {
                 //logger.severe("XME : NEW MESSAGE");
-                String vlcId="";
                 try {
-                    vlcId = jsonObject.getString("data");
+                    String newID=jsonObject.getString("data");
+                    /*/ Do the filtering
+                    if (vlcId!=null&&(newID.startsWith(vlcId.substring(0, 3))))
+                        return;
+                    //  END OF FILTERING */
+                    vlcId=newID;
+
                 } catch (JSONException e) {
                     VLCIndoorLocation.this.handler.post(new Runnable() {
                         @Override
@@ -112,8 +137,13 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
                     return;
                 }
                 // get the location from the location service
-                final IndoorLocation localLocation=  getVlcIndoorLocation().getHardLocation(vlcId, getVlcIndoorLocation().vlcApiKey);
-                if ( true||localLocation.getLatitude() != lastLocation.getLatitude()
+                final IndoorLocation localLocation;
+                if(doLiveLocation)
+                    localLocation=getLocationFromMapwize(vlcId,VLCIndoorLocation.this.vlcApiKey);
+                else
+                    localLocation=  VLCIndoorLocation.this.getHardLocation(vlcId, VLCIndoorLocation.this.vlcApiKey);
+                if (localLocation==null) return;
+                if ( localLocation.getLatitude() != lastLocation.getLatitude()
                         || localLocation.getLongitude() != lastLocation.getLongitude()
                         || localLocation.getFloor() != lastLocation.getFloor())
                 {
@@ -125,7 +155,7 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
                     VLCIndoorLocation.this.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            getVlcIndoorLocation().dispatchIndoorLocationChange(localLocation);
+                            VLCIndoorLocation.this.dispatchIndoorLocationChange(localLocation);
                         }
                     });
                 }else{
@@ -173,8 +203,27 @@ public final class VLCIndoorLocation extends IndoorLocationProvider
     }
 
     private IndoorLocation getLocationFromMapwize(String idVLC,String key){
+        IndoorLocation newLocation = new IndoorLocation(lastLocation,lastLocation.getFloor());
+        boolean found = false;
+        VLCBeaconListRetriever.VLCBeacon current;
+        Iterator<VLCBeaconListRetriever.VLCBeacon> it = vlcKnownLocation.iterator();
+        while (it.hasNext()) {
 
-        return lastLocation;
+            current = it.next();
+            //logger.severe(current.alias);
+            if (idVLC.equals(current.properties.lightId)) {
+                newLocation.setFloor(current.floor);
+                newLocation.setLatitude(current.location.lat);
+                newLocation.setLongitude(current.location.lon);
+                newLocation.setTime(System.currentTimeMillis());
+                newLocation.setAccuracy(0f);
+                newLocation.setBearing(0f);
+                found=true;
+                break;
+            }
+        }
+        if (found) return newLocation;
+        else return null;
     }
     private IndoorLocation getHardLocation(String idVLC, String key){
         // TODO 19/02/2018 : replace these lines with an http request

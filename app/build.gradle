@@ -12,7 +12,11 @@ android {
     signingConfigs {
         release {
             try {
-                storeFile file("/Users/xme/.android/"+KEY_FILE )
+                if (System.properties['os.name'].toLowerCase().contains('windows')) {
+                    storeFile file("C:\\Users\\Xavier\\.android\\"+KEY_FILE )
+                } else {
+                    storeFile file("/Users/xme/.android/"+KEY_FILE )
+                }
                 //noinspection GroovyAssignabilityCheck
                 storePassword KEYSTORE_PASSWORD
                 keyAlias KEY_ALIAS

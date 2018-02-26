@@ -28,7 +28,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, "pk.eyJ1IjoibWFwd2l6ZSIsImEiOiJjamNhYnN6MjAwNW5pMnZvMnYzYTFpcWVxIn0.veTCqUipGXCw8NwM2ep1Xg"); // PASTE YOU MAPBOX API KEY HERE !!! This is a demo key. It is not allowed to use it for production. The key might change at any time without notice. Get your key by signing up at mapbox.com
+        Mapbox.getInstance(this, "pk.eyJ1IjoieGF2aWVybWVsZW5kZXoiLCJhIjoiY2pkdmgyaDJiMDlyZzJxczRiOTJoZ250YSJ9.nFGN96rpfQUIvAT5pB7hMw"); // PASTE YOU MAPBOX API KEY HERE !!! This is a demo key. It is not allowed to use it for production. The key might change at any time without notice. Get your key by signing up at mapbox.com
         setContentView(R.layout.activity_map);
 
         mapView = findViewById(R.id.mapview);
@@ -113,10 +113,12 @@ public class MapActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         mapView.onResume();
-
-        if (VLCIndoorLocation.getVlcIndoorLocation()!=null && !VLCIndoorLocation.getVlcIndoorLocation().isStarted()){
-            VLCIndoorLocation.getVlcIndoorLocation().start();
+        if (mapwizePlugin != null) {
+            mapwizePlugin.onResume();
         }
+        /*if (VLCIndoorLocation.getVlcIndoorLocation()!=null && !VLCIndoorLocation.getVlcIndoorLocation().isStarted()){
+            VLCIndoorLocation.getVlcIndoorLocation().start();
+        }*/
 
     }
 
@@ -124,10 +126,12 @@ public class MapActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         mapView.onPause();
-
-        if (VLCIndoorLocation.getVlcIndoorLocation()!=null && VLCIndoorLocation.getVlcIndoorLocation().isStarted()){
-            VLCIndoorLocation.getVlcIndoorLocation().stop();
+        if (mapwizePlugin != null) {
+            mapwizePlugin.onPause();
         }
+        /*if (VLCIndoorLocation.getVlcIndoorLocation()!=null && VLCIndoorLocation.getVlcIndoorLocation().isStarted()){
+            VLCIndoorLocation.getVlcIndoorLocation().stop();
+        }*/
     }
 
     @Override

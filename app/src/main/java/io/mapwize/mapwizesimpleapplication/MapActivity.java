@@ -17,7 +17,11 @@ import java.util.logging.Logger;
 
 import io.mapwize.mapwizeformapbox.MapOptions;
 import io.mapwize.mapwizeformapbox.MapwizePlugin;
+import io.mapwize.mapwizeformapbox.api.ApiCallback;
+import io.mapwize.mapwizeformapbox.model.Venue;
 import io.slms.cordova.vlc.VLCIndoorLocation;
+
+import static io.mapwize.mapwizeformapbox.api.Api.getVenue;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -85,7 +89,7 @@ public class MapActivity extends AppCompatActivity {
                 mapwizePlugin = new MapwizePlugin(mapView, mapboxMap, options);
                 mapwizePlugin.setLocationProvider(VLCIndoorLocation.getVlcIndoorLocation());
 
-                /*getVenue("5a8b1432c0b1600013546407",new ApiCallback<Venue>(){
+                getVenue("aborelec_-_aile_3",new ApiCallback<Venue>(){
 
                     @Override
                     public void onSuccess(Venue venue) {
@@ -95,9 +99,9 @@ public class MapActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Throwable throwable) {
-                        logger.severe("XME : Api.getVenue -> Error");
+                        logger.severe("XME : Api.getVenue -> Error"+throwable.getLocalizedMessage());
                     }
-                });*/
+                });
 
             }
         });
